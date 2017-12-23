@@ -25,6 +25,44 @@ namespace SimpleWirelessSimualator
             InitializeComponent();
             InitComboBox();
             SetupWirelessNetwork(new WirelessNetwork());
+
+            NetworkControl.MouseMove += NetworkControl_MouseMove;
+            NetworkControl.MouseLeftButtonDown += NetworkControl_MouseLeftButtonDown;
+            NetworkControl.MouseLeftButtonUp += NetworkControl_MouseLeftButtonUp;
+        }
+
+        private void NetworkControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Point p = e.GetPosition(NetworkControl);
+            p = NetworkControl.ScreenToLocal(p);
+
+            ActionContext c = GetActionContext();
+            c?.MouseUp?.Invoke(p);
+        }
+
+        private void NetworkControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Point p = e.GetPosition(NetworkControl);
+            p = NetworkControl.ScreenToLocal(p);
+
+            ActionContext c = GetActionContext();
+            c?.MouseDown?.Invoke(p);
+        }
+
+        private void NetworkControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            Point p = e.GetPosition(NetworkControl);
+            p = NetworkControl.ScreenToLocal(p);
+
+            ActionContext c = GetActionContext();
+            c?.MouseMove?.Invoke(p);
+        }
+
+        ActionContext GetActionContext()
+        {
+            ComboBoxItem item = comboBox.SelectedItem as ComboBoxItem;
+            ActionContext c = item?.DataContext as ActionContext;
+            return c;
         }
 
         WirelessNetwork Network;
@@ -32,6 +70,7 @@ namespace SimpleWirelessSimualator
         void SetupWirelessNetwork(WirelessNetwork wn)
         {
             Network = wn;
+            boxRange.Text = Network.BaseTransmitRange.ToString();
             NetworkControl.SetNetwork(wn);
         }
 
@@ -42,9 +81,16 @@ namespace SimpleWirelessSimualator
 
             comboBox.Items.Add(new ComboBoxItem()
             {
+                Content = "Move",
+                DataContext = new ActionContext() { MouseMove = MoveHighlightNode, MouseDown = MoveMouseDown, MouseUp = MoveMouseUp }
+            });
+
+            comboBox.Items.Add(new ComboBoxItem()
+            {
                 Content = "Delete Node",
                 DataContext = new ActionContext() { MouseMove = MoveHighlightNode, MouseDown = DeleteMouseDown, MouseUp = DeleteMouseUp }
             });
+
 
             comboBox.Items.Add(new ComboBoxItem()
             {
@@ -74,14 +120,56 @@ namespace SimpleWirelessSimualator
             }
         }
 
+        WirelessNetworkNode SelectedNode = null;
+
         void MoveHighlightNode(Point p)
+        {
+            if (Network != null)
+            {
+                WirelessNetworkNode selNode = null;
+                Point selPoint = new Point();
+                double minDistance = double.PositiveInfinity;
+                foreach(var node in Network.Nodes)
+                {
+                    Point np = new Point(node.X, node.Y);
+                    double dsquared = (p - np).LengthSquared;
+                    if(dsquared < minDistance)
+                    {
+                        selNode = node;
+                        selPoint = np;
+                        minDistance = dsquared;
+                    }
+                }
+
+                if(minDistance < (20*20))
+                {
+                    SelectedNode = selNode;
+                    p = selPoint;
+                }
+                else
+                {
+                    SelectedNode = null;
+                }
+            }
+            NetworkControl.SetUserCursor(p);
+        }
+
+        void MoveMouseDown(Point p)
+        {
+
+        }
+        void MoveMouseUp(Point p)
         {
 
         }
 
         void DeleteMouseDown(Point p)
         {
-
+            if(SelectedNode != null)
+            {
+                Network.Nodes.Remove(SelectedNode);
+                NetworkControl.Redraw();
+            }
         }
         void DeleteMouseUp(Point p)
         {
@@ -99,6 +187,23 @@ namespace SimpleWirelessSimualator
 
         void AddMouseDown(Point p)
         {
+            p = NetworkControl.ScreenToLocal(p);
+            ActionContext c = GetActionContext();
+            if(c?.AddNodeType != null)
+            {
+                // Verify that we are not adding too close to another node.
+                if (SelectedNode != null) return;
+
+                Network.Nodes.Add(new WirelessNetworkNode()
+                {
+                    NodeType = c.AddNodeType.Name,
+                    X = p.X,
+                    Y = p.Y
+
+                });
+
+                NetworkControl.Redraw();
+            }
 
         }
 
@@ -109,7 +214,12 @@ namespace SimpleWirelessSimualator
 
         private void boxRange_TextChanged(object sender, TextChangedEventArgs e)
         {
-
+            double newRange;
+            if(Network != null && double.TryParse(boxRange.Text, out newRange))
+            {
+                Network.BaseTransmitRange = newRange;
+                NetworkControl.Redraw();
+            }
         }
 
         private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
