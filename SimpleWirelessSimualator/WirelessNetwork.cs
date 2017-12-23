@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace SimpleWirelessSimualator
 {
-    class WirelessNetwork
+    public class WirelessNetwork
     {
         public List<WirelessNetworkNode> Nodes = new List<WirelessNetworkNode>();
         public double BaseTransmitRange = 30;
     }
 
-    class WirelessNetworkNode
+    public class WirelessNetworkNode
     {
         public double X, Y, Z;
         public string NodeType;

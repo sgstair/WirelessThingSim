@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -25,6 +26,27 @@ namespace SimpleWirelessSimualator
     {
         public WirelessNetworkSimulation ParentSimulation;
         public double DeviceTimingSkew; // Allow for variation in exact timings - Crystal used is ~50ppm, so not much of a variation.
+
+
+        public static Type[] FindSimulatedNodeTypes()
+        {
+            List<Type> returnData = new List<Type>();
+            foreach(var type in Assembly.GetExecutingAssembly().GetTypes())
+            {
+                var attribute = type.GetCustomAttribute<SimulatedNodeAttribute>();
+                if(attribute != null)
+                {
+                    if(!type.GetInterfaces().Contains(typeof(ISimulatedDevice)))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Type {type.Name} excluded from simulated node types because it doesn't implement ISimulatedDevice");
+                        continue;
+                    }
+
+                    returnData.Add(type);
+                }
+            }
+            return returnData.ToArray();
+        }
 
         // Provide API to control the radio and power states of the device
 
@@ -60,7 +82,7 @@ namespace SimpleWirelessSimualator
         /// <summary>
         /// Go into the radio's transmit mode temporarily (after receiving a packet if one is in progress), and transmit the specified packet.
         /// </summary>
-        public void RadioTransmitPacket(object packet)
+        public void RadioTransmitPacket(object packet, double preDelay = 0)
         {
 
         }
