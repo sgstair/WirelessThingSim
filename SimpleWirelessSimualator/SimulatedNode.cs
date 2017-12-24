@@ -25,7 +25,7 @@ namespace SimpleWirelessSimualator
     class SimulatedNode
     {
         public WirelessNetworkSimulation ParentSimulation;
-        public double DeviceTimingSkew; // Allow for variation in exact timings - Crystal used is ~50ppm, so not much of a variation.
+        public double DeviceTimingSkew = 1; // Allow for variation in exact timings - Crystal used is ~50ppm, so not much of a variation.
 
 
         public static Type[] FindSimulatedNodeTypes()
