@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,6 +21,9 @@ namespace SimpleWirelessSimualator
     /// </summary>
     public partial class MainWindow : Window
     {
+        const int TickRateMs = 50;
+        Timer SimulationTimer; 
+
         public MainWindow()
         {
             InitializeComponent();
@@ -29,6 +33,27 @@ namespace SimpleWirelessSimualator
             NetworkControl.MouseMove += NetworkControl_MouseMove;
             NetworkControl.MouseLeftButtonDown += NetworkControl_MouseLeftButtonDown;
             NetworkControl.MouseLeftButtonUp += NetworkControl_MouseLeftButtonUp;
+
+            SimulationTimer = new Timer(SimulationTick);
+
+        }
+
+        DateTime LastTick = DateTime.Now;
+        void SimulationTick(object context)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if(Simulation != null)
+                {
+                    DateTime now = DateTime.Now;
+
+                    double simTime = now.Subtract(LastTick).TotalSeconds;
+                    LastTick = now;
+
+                    Simulation.SimulateTime(simTime);
+
+                }
+            });
         }
 
         private void NetworkControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -66,6 +91,7 @@ namespace SimpleWirelessSimualator
         }
 
         WirelessNetwork Network;
+        WirelessNetworkSimulation Simulation;
 
         void SetupWirelessNetwork(WirelessNetwork wn)
         {
@@ -196,7 +222,7 @@ namespace SimpleWirelessSimualator
 
                 Network.Nodes.Add(new WirelessNetworkNode()
                 {
-                    NodeType = c.AddNodeType.Name,
+                    NodeType = c.AddNodeType.FullName,
                     X = p.X,
                     Y = p.Y
 
@@ -234,18 +260,25 @@ namespace SimpleWirelessSimualator
             }
         }
 
-        bool SimulationRunning;
+        bool SimulationRunning = false;
         private void btnStartStop_Click(object sender, RoutedEventArgs e)
         {
             if(SimulationRunning)
             {
                 btnStartStop.Content = "Start Simulation";
+                SimulationTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                Simulation = null;
 
             }
             else
             {
                 btnStartStop.Content = "Stop Simulation";
+                Simulation = new WirelessNetworkSimulation(Network);
+                Simulation.StartSimulation();
+                LastTick = DateTime.Now;
+                SimulationTimer.Change(TickRateMs, TickRateMs);
             }
+            SimulationRunning = !SimulationRunning;
         }
     }
     class ActionContext

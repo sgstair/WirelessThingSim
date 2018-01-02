@@ -27,6 +27,10 @@ namespace SimpleWirelessSimualator
         public WirelessNetworkSimulation ParentSimulation;
         public double DeviceTimingSkew = 1; // Allow for variation in exact timings - Crystal used is ~50ppm, so not much of a variation.
 
+        public SimulationEventQueue PastEvents = new SimulationEventQueue();
+        public List<WirelessPacketTransmission> InFlightPackets = new List<WirelessPacketTransmission>(); // Packets that have been sent but not fully received yet.
+
+        public Action TimerAction;
 
         public static Type[] FindSimulatedNodeTypes()
         {
@@ -53,7 +57,7 @@ namespace SimpleWirelessSimualator
         /// <summary>
         /// Power-on time of this device in seconds
         /// </summary>
-        public double CurrentTime { get; private set; }
+        public double CurrentTime { get { return ParentSimulation.CurrentTime; } }
 
         /// <summary>
         /// Set the radio into polling mode in a loop - Spending some time active listening for packets, and then some time powered down.
