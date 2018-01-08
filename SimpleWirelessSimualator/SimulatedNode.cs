@@ -30,7 +30,12 @@ namespace SimpleWirelessSimualator
         public SimulationEventQueue PastEvents = new SimulationEventQueue();
         public List<WirelessPacketTransmission> InFlightPackets = new List<WirelessPacketTransmission>(); // Packets that have been sent but not fully received yet.
 
+        public Color LedColor;
+
         public Action TimerAction;
+        public SimulationEvent TimerEvent;
+
+        public Dictionary<int, bool> ButtonState = new Dictionary<int, bool>();
 
         public static Type[] FindSimulatedNodeTypes()
         {
@@ -88,7 +93,7 @@ namespace SimpleWirelessSimualator
         /// </summary>
         public void RadioTransmitPacket(object packet, double preDelay = 0)
         {
-
+            ParentSimulation.NodeSendPacket(this, packet, preDelay);
         }
 
         /// <summary>
@@ -96,7 +101,8 @@ namespace SimpleWirelessSimualator
         /// </summary>
         public void SetTimerCallback(double time, Action callback)
         {
-
+            TimerAction = callback;
+            ParentSimulation.NodeSetTimer(this, time, callback);
         }
 
         /// <summary>
@@ -104,14 +110,19 @@ namespace SimpleWirelessSimualator
         /// </summary>
         public void SetLedColor(Color c)
         {
-
+            ParentSimulation.NodeSetLed(this, c);
         }
 
         /// <summary>
         /// Get the current state of one of the N pushbuttons attached to this device.
         /// </summary>
-        public bool GetInputValue(int input)
+        public bool GetInputValue(int input = 0)
         {
+            bool value;
+            if(ButtonState.TryGetValue(input, out value))
+            {
+                return value;
+            }
             return false;
         }
 
@@ -120,7 +131,7 @@ namespace SimpleWirelessSimualator
         /// </summary>
         public void CancelTimer()
         {
-
+            SetTimerCallback(0, null);
         }
     }
 

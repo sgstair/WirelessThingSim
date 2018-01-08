@@ -36,6 +36,12 @@ namespace SimpleWirelessSimualator
 
             SimulationTimer = new Timer(SimulationTick);
 
+            Closing += MainWindow_Closing;
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            StopSimulation();
         }
 
         DateTime LastTick = DateTime.Now;
@@ -100,6 +106,7 @@ namespace SimpleWirelessSimualator
             NetworkControl.SetNetwork(wn);
         }
 
+        ComboBoxItem InteractItem;
 
         void InitComboBox()
         {
@@ -118,11 +125,12 @@ namespace SimpleWirelessSimualator
             });
 
 
-            comboBox.Items.Add(new ComboBoxItem()
+            InteractItem = (new ComboBoxItem()
             {
                 Content = "Interact with Node",
                 DataContext = new ActionContext() { MouseMove = MoveHighlightNode, MouseDown = InteractMouseDown, MouseUp = InteractMouseUp }
             });
+            comboBox.Items.Add(InteractItem);
 
             comboBox.Items.Add(new Separator());
 
@@ -204,11 +212,18 @@ namespace SimpleWirelessSimualator
 
         void InteractMouseDown(Point p)
         {
-
+            if(SelectedNode != null)
+            {
+                Simulation.SetButtonState(SimulatorNodes[SelectedNode], true);
+            }
         }
         void InteractMouseUp(Point p)
         {
-
+            if (SelectedNode != null)
+            {
+                // Fodo: Currently button release only occurs if you keep the mouse over the node, fix this in the future.
+                Simulation.SetButtonState(SimulatorNodes[SelectedNode], false);
+            }
         }
 
         void AddMouseDown(Point p)
@@ -260,25 +275,50 @@ namespace SimpleWirelessSimualator
             }
         }
 
+        Dictionary<WirelessNetworkNode, WirelessSimulationNode> SimulatorNodes = new Dictionary<WirelessNetworkNode, WirelessSimulationNode>();
         bool SimulationRunning = false;
         private void btnStartStop_Click(object sender, RoutedEventArgs e)
         {
             if(SimulationRunning)
             {
-                btnStartStop.Content = "Start Simulation";
-                SimulationTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                Simulation = null;
-
+                StopSimulation();
             }
             else
             {
                 btnStartStop.Content = "Stop Simulation";
+
+                comboBox.SelectedItem = InteractItem;
+                comboBox.IsEnabled = false;
+
                 Simulation = new WirelessNetworkSimulation(Network);
+                Simulation.LedStateChanged += Simulation_LedStateChanged;
+                SimulatorNodes.Clear();
+                foreach(var n in Simulation.SimulationNodes)
+                {
+                    SimulatorNodes[n.NetworkNode] = n;
+                }
                 Simulation.StartSimulation();
                 LastTick = DateTime.Now;
                 SimulationTimer.Change(TickRateMs, TickRateMs);
             }
             SimulationRunning = !SimulationRunning;
+        }
+
+        private void Simulation_LedStateChanged()
+        {
+            // Need to update rendering for LEDs.
+        }
+
+        private void StopSimulation()
+        {
+            if (SimulationRunning)
+            {
+                btnStartStop.Content = "Start Simulation";
+                SimulationTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                Simulation = null;
+
+                comboBox.IsEnabled = true;
+            }
         }
     }
     class ActionContext

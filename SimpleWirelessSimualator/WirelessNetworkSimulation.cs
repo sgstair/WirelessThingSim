@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace SimpleWirelessSimualator
 {
@@ -14,6 +15,8 @@ namespace SimpleWirelessSimualator
 
         public List<WirelessSimulationNode> SimulationNodes = new List<WirelessSimulationNode>();
 
+
+        public event Action LedStateChanged;
 
         public WirelessNetworkSimulation(WirelessNetwork baseNetwork)
         {
@@ -93,7 +96,7 @@ namespace SimpleWirelessSimualator
                         }
                         break;
                     case EventType.TimerComplete:
-                        e.Origin.TimerAction();
+                        e.Origin.TimerAction?.Invoke();
                         break;
                     default:
                         throw new NotSupportedException("Unsupported event type in queue");
@@ -108,7 +111,42 @@ namespace SimpleWirelessSimualator
         SimulationEventQueue PendingEvents = new SimulationEventQueue();
 
 
+        public void SetButtonState(WirelessSimulationNode n, bool state, int index = 0)
+        {
+            n.Node.PastEvents.Append(new SimulationEvent(CurrentTime, n.Node, EventType.ButtonChange, new ButtonEventContext() { Index = index, Pressed = state }));
+            n.Node.ButtonState[index] = state;
+            ((ISimulatedDevice)n.Node).InputEvent(index, state);
+        }
 
+
+
+        internal void NodeSetLed(SimulatedNode n, Color c)
+        {
+            n.LedColor = c;
+            n.PastEvents.Append(new SimulationEvent(CurrentTime, n, EventType.LedChange, c));
+            LedStateChanged?.Invoke();
+        }
+        
+        internal void NodeSetTimer(SimulatedNode n, double time, Action callback)
+        {
+            if(n.TimerEvent != null)
+            {
+                PendingEvents.Remove(n.TimerEvent);
+                n.TimerEvent = null;
+            }
+            var context = new TimerEventContext() { Callback = callback, Time = time };
+            n.PastEvents.Append(new SimulationEvent(CurrentTime, n, EventType.TimerSet, context));
+            if(callback != null && time >= 0)
+            {
+                n.TimerEvent = new SimulationEvent(CurrentTime + time, n, EventType.TimerComplete, context);
+                PendingEvents.Insert(n.TimerEvent);
+            }
+        }
+
+        internal void NodeSendPacket(SimulatedNode n, object packet, double preDelay)
+        {
+
+        }
     }
     class WirelessSimulationNode
     {
@@ -180,6 +218,18 @@ namespace SimpleWirelessSimualator
         public SimulatedNode Origin;
         public EventType Type;
         public object EventContext;
+    }
+
+    public class TimerEventContext
+    {
+        public Action Callback;
+        public double Time;
+    }
+
+    public class ButtonEventContext
+    {
+        public int Index;
+        public bool Pressed;
     }
 
     class WirelessPacket
