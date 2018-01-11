@@ -18,9 +18,9 @@ namespace SimpleWirelessSimualator
     /// <summary>
     /// Interaction logic for WirlessNetworkControl.xaml
     /// </summary>
-    public partial class WirlessNetworkControl : UserControl
+    public partial class WirelessNetworkControl : UserControl
     {
-        public WirlessNetworkControl()
+        public WirelessNetworkControl()
         {
             InitializeComponent();
             
@@ -31,6 +31,22 @@ namespace SimpleWirelessSimualator
         {
             Network = wn;
             InvalidateVisual();
+        }
+
+        WirelessNetworkSimulation Simulation;
+        Dictionary<WirelessNetworkNode, WirelessSimulationNode> SimulationNodes;
+        internal void SetSimulation(WirelessNetworkSimulation sim, Dictionary<WirelessNetworkNode, WirelessSimulationNode> simNodes)
+        {
+            Simulation = sim;
+            SimulationNodes = simNodes;
+            Redraw();
+        }
+
+        internal void StopSimulation()
+        {
+            Simulation = null;
+            SimulationNodes = null;
+            Redraw();
         }
 
         public Point ScreenToLocal(Point screenPoint)
@@ -82,6 +98,18 @@ namespace SimpleWirelessSimualator
                     dc.DrawEllipse(Brushes.Black, null, pt, 10, 10);
                 }
 
+                if(SimulationNodes != null)
+                {
+                    foreach(var sn in Simulation.SimulationNodes)
+                    {
+                        var node = sn.NetworkNode;
+                        Point pt = new Point(node.X, node.Y);
+                        pt = LocalToScreen(pt);
+                        Brush b = new SolidColorBrush(sn.Node.LedColor);
+                        dc.DrawEllipse(b, null, pt, 8, 8);
+
+                    }
+                }
 
             }
             if(UserCursor != null)

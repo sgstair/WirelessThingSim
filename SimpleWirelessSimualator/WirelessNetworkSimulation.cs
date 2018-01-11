@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 
 namespace SimpleWirelessSimualator
@@ -28,6 +29,7 @@ namespace SimpleWirelessSimualator
 
                 SimulatedNode simNode = (SimulatedNode)t.GetConstructor(new Type[] { }).Invoke(new object[] { });
                 simNode.ParentSimulation = this;
+                simNode.SourceNode = n;
 
                 WirelessSimulationNode sn = new WirelessSimulationNode()
                 {
@@ -90,6 +92,7 @@ namespace SimpleWirelessSimualator
                         break;
                     case EventType.PacketComplete:
                         var pkt = e.EventContext as WirelessPacketTransmission;
+                        e.Origin.InFlightPackets.Remove(pkt);
                         if(pkt.ReceiveSuccess)
                         {
                             device.ReceivePacket(pkt.Packet.PacketContents);
@@ -145,7 +148,74 @@ namespace SimpleWirelessSimualator
 
         internal void NodeSendPacket(SimulatedNode n, object packet, double preDelay)
         {
+            WirelessPacket wp = new WirelessPacket() { StartTime = CurrentTime + preDelay, Origin = n, PacketContents = packet };
 
+            // Compute how long the packet is being transmitted for
+            double transmitSpeed = 2000000;
+            int packetBits = 18 * 8;
+
+            double packetTime = packetBits / (transmitSpeed * n.DeviceTimingSkew);
+
+            wp.EndTime = wp.StartTime + packetTime;
+
+            n.PastEvents.Append(new SimulationEvent(CurrentTime, n, EventType.Packet, wp));
+
+            // Find nodes that are in range
+            foreach (var sn in SimulationNodes)
+            {
+                // For each node,
+                // Determine whether the node is listening when the packet starts
+                if (sn.Node == n) continue; // Don't send to self.
+                // Future: deal with Z differences
+                Vector v = new Vector(sn.NetworkNode.X - n.SourceNode.X, sn.NetworkNode.Y - n.SourceNode.Y);
+                double distance = v.Length;
+                if (distance > Network.BaseTransmitRange) continue; // Node out of range.
+
+                const double TransmitPropogationSpeed = 300000000; // Speed of RF propogation in air (Close enough)
+
+                WirelessPacketTransmission t = new WirelessPacketTransmission()
+                {
+                    Packet = wp,
+                    Receiver = sn.Node,
+                    ReceiveSuccess = true,
+                    SignalLevel = 0,
+                    WirelessDelay = distance / TransmitPropogationSpeed
+                };
+
+                // Add a random spike noise check to occasionally drop the packet regardless of other factors.
+                double randomNoiseChance = 0.01; // 1% of packets drop due to random environmental noise
+                if(NextRandom() <= randomNoiseChance)
+                {
+                    t.ReceiveSuccess = false;
+                }
+
+                // Assign a "received signal level" to this packet, and check against a random noise floor (some packets will not be received due to environmental factors)
+                // Signal level can be attenuated by walls in the future, and can be used for overlap checks.
+
+                // for now, give signal level between 0 (distance 0) and -80 (distance full)
+                t.SignalLevel = 0 - 80 * (distance / Network.BaseTransmitRange);
+
+                // Seperately randomly drop packets based on distance.
+                if(NextRandom() < (distance / Network.BaseTransmitRange)*0.7)
+                {
+                    // 70% chance to fail receive at max range.
+                    t.ReceiveSuccess = false;
+                }
+
+                // Check whether this packet transmit window overlaps other packets, if so drop both packets (for now)
+                foreach(var otherPacket in sn.Node.InFlightPackets)
+                {
+                    if(t.Overlaps(otherPacket))
+                    {
+                        t.ReceiveSuccess = false;
+                        otherPacket.ReceiveSuccess = false;
+                    }   
+                }
+
+                // Queue this pending packet (end transmission, and in node pending list)
+                PendingEvents.Insert(new SimulationEvent(t.EndTime, sn.Node, EventType.PacketComplete, t));
+                sn.Node.InFlightPackets.Add(t);
+            }
         }
     }
     class WirelessSimulationNode
@@ -243,8 +313,17 @@ namespace SimpleWirelessSimualator
     {
         public WirelessPacket Packet;
         public SimulatedNode Receiver;
+        public double SignalLevel; // Representative signal level for the packet (approximately in dBmv)
         public double WirelessDelay; // Time it takes packet to move through the air
         public bool ReceiveSuccess = true; // Set to false whenever packet fails for some reason.
+
+        public double StartTime { get { return Packet.StartTime + WirelessDelay; } }
+        public double EndTime { get { return Packet.EndTime + WirelessDelay; } }
+
+        public bool Overlaps(WirelessPacketTransmission otherPacket)
+        {
+            return !(StartTime > otherPacket.EndTime || EndTime < otherPacket.StartTime);
+        }
     }
 
 }

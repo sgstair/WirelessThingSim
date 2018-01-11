@@ -20,7 +20,7 @@
             <Separator Width="20" Visibility="Hidden"/>
             <Button x:Name="btnStartStop" Content="Start Simulation" Width="115" Click="btnStartStop_Click"/>
         </WrapPanel>
-        <local:WirlessNetworkControl x:Name="NetworkControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" />
+        <local:WirelessNetworkControl x:Name="NetworkControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" />
 
 
     </Grid>

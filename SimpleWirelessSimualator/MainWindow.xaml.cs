@@ -298,6 +298,7 @@ namespace SimpleWirelessSimualator
                     SimulatorNodes[n.NetworkNode] = n;
                 }
                 Simulation.StartSimulation();
+                NetworkControl.SetSimulation(Simulation, SimulatorNodes);
                 LastTick = DateTime.Now;
                 SimulationTimer.Change(TickRateMs, TickRateMs);
             }
@@ -307,6 +308,7 @@ namespace SimpleWirelessSimualator
         private void Simulation_LedStateChanged()
         {
             // Need to update rendering for LEDs.
+            NetworkControl.Redraw();
         }
 
         private void StopSimulation()
@@ -316,6 +318,7 @@ namespace SimpleWirelessSimualator
                 btnStartStop.Content = "Start Simulation";
                 SimulationTimer.Change(Timeout.Infinite, Timeout.Infinite);
                 Simulation = null;
+                NetworkControl.StopSimulation();
 
                 comboBox.IsEnabled = true;
             }

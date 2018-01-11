@@ -25,6 +25,7 @@ namespace SimpleWirelessSimualator
     class SimulatedNode
     {
         public WirelessNetworkSimulation ParentSimulation;
+        public WirelessNetworkNode SourceNode;
         public double DeviceTimingSkew = 1; // Allow for variation in exact timings - Crystal used is ~50ppm, so not much of a variation.
 
         public SimulationEventQueue PastEvents = new SimulationEventQueue();
