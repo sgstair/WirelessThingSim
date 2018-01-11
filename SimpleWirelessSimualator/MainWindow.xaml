@@ -8,10 +8,11 @@
         Title="MainWindow" Height="700" Width="1000">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <WrapPanel VerticalAlignment="Center" Grid.Row="0">
+        <WrapPanel VerticalAlignment="Center" Grid.Row="1">
             <Label x:Name="label" Content="Wireless Range:"/>
             <TextBox x:Name="boxRange" Height="23" TextWrapping="Wrap" Text="0" Width="120" TextChanged="boxRange_TextChanged"/>
             <Separator Width="20" Visibility="Hidden"/>
@@ -20,7 +21,19 @@
             <Separator Width="20" Visibility="Hidden"/>
             <Button x:Name="btnStartStop" Content="Start Simulation" Width="115" Click="btnStartStop_Click"/>
         </WrapPanel>
-        <local:WirelessNetworkControl x:Name="NetworkControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" />
+        <local:WirelessNetworkControl x:Name="NetworkControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2" />
+        <Menu x:Name="menu" Grid.Row="0">
+            <MenuItem Header="File">
+                <MenuItem x:Name="mnuLoad" Header="Load" Click="mnuLoad_Click"/>
+                <MenuItem x:Name="mnuSave" Header="Save" Click="mnuSave_Click"/>
+                <Separator />
+                <MenuItem x:Name="mnuExit" Header="Exit" Click="mnuExit_Click"/>
+            </MenuItem>
+            <MenuItem Header="Image">
+                <MenuItem x:Name="mnuSetBackground" Header="Set Background" Click="mnuSetBackground_Click"/>
+                <MenuItem x:Name="mnuRemoveBackground" Header="Remove Background" Click="mnuRemoveBackground_Click"/>
+            </MenuItem>
+        </Menu>
 
 
     </Grid>

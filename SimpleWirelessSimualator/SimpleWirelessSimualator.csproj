@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FileDialog.cs" />
     <Compile Include="NodeDemo1.cs" />
     <Compile Include="SimulatedNode.cs" />
     <Compile Include="WirelessNetwork.cs" />

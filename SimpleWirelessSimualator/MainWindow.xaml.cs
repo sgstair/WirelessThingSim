@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml.Serialization;
 
 namespace SimpleWirelessSimualator
 {
@@ -322,6 +324,70 @@ namespace SimpleWirelessSimualator
 
                 comboBox.IsEnabled = true;
             }
+        }
+
+        private void mnuLoad_Click(object sender, RoutedEventArgs e)
+        {
+            string filename = FileDialog.GetOpenFilename("Load Project...", "ws", "Wireless Simulator File");
+            if(filename != null)
+            {
+                // Try to load it
+                try
+                {
+                    FileStream fs = File.OpenRead(filename);
+
+                    XmlSerializer xs = new XmlSerializer(typeof(WirelessNetwork));
+                    WirelessNetwork wn = (WirelessNetwork)xs.Deserialize(fs);
+
+                    fs.Close();
+
+
+                    StopSimulation();
+                    SetupWirelessNetwork(wn);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Exception while trying to Load file.\n" + ex.ToString());
+                }
+            }
+        }
+
+        private void mnuSave_Click(object sender, RoutedEventArgs e)
+        {
+            string filename = FileDialog.GetSaveFilename("Save Project...", "ws", "Wireless Simulator File");
+            if (filename != null)
+            {
+                // Save current network to file.
+                try
+                {
+                    FileStream fs = File.OpenWrite(filename);
+
+                    XmlSerializer xs = new XmlSerializer(typeof(WirelessNetwork));
+                    xs.Serialize(fs, Network);
+
+                    fs.Close();
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("Exception while trying to save file.\n" + ex.ToString());
+                }
+
+            }
+        }
+
+        private void mnuExit_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void mnuSetBackground_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void mnuRemoveBackground_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
     class ActionContext
