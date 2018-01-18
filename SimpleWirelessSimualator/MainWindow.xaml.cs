@@ -35,10 +35,21 @@ namespace SimpleWirelessSimualator
             NetworkControl.MouseMove += NetworkControl_MouseMove;
             NetworkControl.MouseLeftButtonDown += NetworkControl_MouseLeftButtonDown;
             NetworkControl.MouseLeftButtonUp += NetworkControl_MouseLeftButtonUp;
+            NetworkControl.MouseWheel += NetworkControl_MouseWheel;
 
             SimulationTimer = new Timer(SimulationTick);
 
             Closing += MainWindow_Closing;
+        }
+
+        private void NetworkControl_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            const double ZoomPower = 1.002;
+
+            Point screen = e.GetPosition(NetworkControl);
+            double zoom = Math.Pow(ZoomPower, e.Delta);
+
+            NetworkControl.DoZoom(screen, zoom);
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -117,7 +128,7 @@ namespace SimpleWirelessSimualator
             comboBox.Items.Add(new ComboBoxItem()
             {
                 Content = "Move",
-                DataContext = new ActionContext() { MouseMove = MoveHighlightNode, MouseDown = MoveMouseDown, MouseUp = MoveMouseUp }
+                DataContext = new ActionContext() { MouseMove = MoveMouseMove, MouseDown = MoveMouseDown, MouseUp = MoveMouseUp }
             });
 
             comboBox.Items.Add(new ComboBoxItem()
@@ -176,8 +187,10 @@ namespace SimpleWirelessSimualator
                         minDistance = dsquared;
                     }
                 }
+                double snapDistance = 20; // pixels
+                snapDistance = Math.Pow(NetworkControl.ScreenToLocal(snapDistance), 2);
 
-                if(minDistance < (20*20))
+                if(minDistance < snapDistance)
                 {
                     SelectedNode = selNode;
                     p = selPoint;
@@ -190,13 +203,30 @@ namespace SimpleWirelessSimualator
             NetworkControl.SetUserCursor(p);
         }
 
+        bool panning = false;
+        Point lastMove;
         void MoveMouseDown(Point p)
         {
-
+            if (SelectedNode == null)
+            {
+                panning = true;
+                lastMove = p;
+            }
         }
         void MoveMouseUp(Point p)
         {
+            panning = false;
+        }
 
+        void MoveMouseMove(Point p)
+        {
+            MoveHighlightNode(p);
+
+            if(panning)
+            {
+                NetworkControl.DoScrollLocal(p - lastMove);
+                //lastMove = p;
+            }
         }
 
         void DeleteMouseDown(Point p)
@@ -230,7 +260,6 @@ namespace SimpleWirelessSimualator
 
         void AddMouseDown(Point p)
         {
-            p = NetworkControl.ScreenToLocal(p);
             ActionContext c = GetActionContext();
             if(c?.AddNodeType != null)
             {
@@ -382,11 +411,42 @@ namespace SimpleWirelessSimualator
 
         private void mnuSetBackground_Click(object sender, RoutedEventArgs e)
         {
+            string filename = FileDialog.GetOpenFilename("Open background image...", "png", "Image File");
+            if(filename != null)
+            {
+                try
+                {
+                    BitmapImage img = new BitmapImage(new Uri(filename));
 
+                    RealizedNetworkImage ri = new RealizedNetworkImage();
+                    ri.Bitmap = img;
+                    ri.FullFilename = filename;
+                    ri.SourceImage = new WirelessNetworkImage();
+                    ri.SourceImage.Scale = 1.0/39;
+                    ri.SourceImage.Filename = filename;
+
+
+                    NetworkControl.Images.Clear();
+                    NetworkControl.Images.Add(ri);
+
+                    Network.Images.Clear();
+                    Network.Images.Add(ri.SourceImage);
+
+                    NetworkControl.Redraw();
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Exception while trying to load image.\n" + ex.ToString());
+                }
+            }
         }
 
         private void mnuRemoveBackground_Click(object sender, RoutedEventArgs e)
         {
+            Network.Images.Clear();
+            NetworkControl.Images.Clear();
+            NetworkControl.Redraw();
 
         }
     }

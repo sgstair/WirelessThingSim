@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,10 +27,21 @@ namespace SimpleWirelessSimualator
             
         }
 
+        public List<RealizedNetworkImage> Images = new List<RealizedNetworkImage>();
+
         WirelessNetwork Network;
         public void SetNetwork(WirelessNetwork wn)
         {
             Network = wn;
+            Images.Clear();
+            foreach(var img in Network.Images)
+            {
+                RealizedNetworkImage ri = new RealizedNetworkImage();
+                ri.SourceImage = img;
+                ri.FullFilename = img.Filename;
+                ri.Bitmap = new BitmapImage(new Uri(ri.FullFilename));
+                Images.Add(ri);
+            }
             InvalidateVisual();
         }
 
@@ -49,18 +61,47 @@ namespace SimpleWirelessSimualator
             Redraw();
         }
 
+        const double MinZoom = 0.1;
+        const double MaxZoom = 1000;
+
+        Point ScreenTopLeft;
+        double Zoom = 80; // Number of pixels in screen space for one pixel in content space
+
         public Point ScreenToLocal(Point screenPoint)
         {
-            return screenPoint;
+            return ScreenTopLeft + (screenPoint - new Point()) / Zoom;
         }
 
         public Point LocalToScreen(Point localPoint)
         {
-            return localPoint;
+            return new Point() + (localPoint - ScreenTopLeft) * Zoom;
+        }
+        public double ScreenToLocal(double screenSize)
+        {
+            return screenSize / Zoom;
         }
         public double LocalToScreen(double localSize)
         {
-            return localSize;
+            return localSize * Zoom;
+        }
+
+        public void DoScroll(Vector screenMovement)
+        {
+            DoScrollLocal(screenMovement / Zoom);
+        }
+        public void DoScrollLocal(Vector localMovement)
+        {
+            ScreenTopLeft -= localMovement;
+            Redraw();
+        }
+
+        public void DoZoom(Point screenPoint, double amount)
+        {
+            Point localPt = ScreenToLocal(screenPoint);
+            Zoom = Math.Min(Math.Max(Zoom * amount, MinZoom), MaxZoom);
+            Point newLocal = ScreenToLocal(screenPoint);
+            ScreenTopLeft -= (newLocal - localPt);
+            Redraw();
         }
 
 
@@ -78,9 +119,17 @@ namespace SimpleWirelessSimualator
 
         protected override void OnRender(DrawingContext dc)
         {
+            Typeface face = new Typeface("Calibri");
             Rect windowSize = new Rect(0, 0, ActualWidth, ActualHeight);
             dc.PushClip(new RectangleGeometry(windowSize));
             dc.DrawRectangle(Brushes.White, null, windowSize);
+
+            foreach(var img in Images)
+            {
+                Point imgLoc = LocalToScreen(new Point(img.SourceImage.X, img.SourceImage.Y));
+                double scale = LocalToScreen(img.SourceImage.Scale);
+                dc.DrawImage(img.Bitmap, new Rect(imgLoc, imgLoc + (new Vector(img.Bitmap.Width, img.Bitmap.Height) * scale)));
+            }
 
             if (Network != null)
             {
@@ -118,9 +167,41 @@ namespace SimpleWirelessSimualator
             }
 
 
+            // Add a scale
+            Point scaleOrigin = windowSize.BottomLeft + new Vector(15, -10);
+            Pen scalePen = new Pen(Brushes.Black, 1);
+            double scaleLength = Zoom;
+            string scaleName = "1m";
+            if(scaleLength < 20)
+            {
+                scaleLength *= 10;
+                scaleName = "10m";
+            }
+            if(scaleLength > 500)
+            {
+                scaleLength /= 10;
+                scaleName = "0.1m";
+            }
+
+            dc.DrawLine(scalePen, scaleOrigin, scaleOrigin + new Vector(scaleLength, 0));
+            dc.DrawLine(scalePen, scaleOrigin+ new Vector(0, 5), scaleOrigin + new Vector(0, -5));
+            dc.DrawLine(scalePen, scaleOrigin+ new Vector(scaleLength, 5), scaleOrigin + new Vector(scaleLength, -5));
+
+            FormattedText ft = new FormattedText(scaleName, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, face, 22, Brushes.Black);
+            Point textPt = scaleOrigin + new Vector(scaleLength / 2 - ft.Width / 2, -5 - ft.Height);
+            dc.DrawText(ft, textPt);
+
             dc.Pop();
             base.OnRender(dc);
         }
 
+    }
+
+
+    public class RealizedNetworkImage
+    {
+        public WirelessNetworkImage SourceImage;
+        public string FullFilename;
+        public ImageSource Bitmap;
     }
 }

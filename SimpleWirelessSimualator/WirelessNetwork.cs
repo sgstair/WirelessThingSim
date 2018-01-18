@@ -9,6 +9,7 @@ namespace SimpleWirelessSimualator
     public class WirelessNetwork
     {
         public List<WirelessNetworkNode> Nodes = new List<WirelessNetworkNode>();
+        public List<WirelessNetworkImage> Images = new List<WirelessNetworkImage>();
         public double BaseTransmitRange = 30;
     }
 
@@ -17,4 +18,13 @@ namespace SimpleWirelessSimualator
         public double X, Y, Z;
         public string NodeType;
     }
+
+    public class WirelessNetworkImage
+    {
+        public string Filename;
+        public double X, Y;
+        public double Scale;
+    }
+
+
 }

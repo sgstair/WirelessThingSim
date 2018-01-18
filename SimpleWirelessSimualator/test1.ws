@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<WirelessNetwork xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Nodes>
+    <WirelessNetworkNode>
+      <X>11.671001705122471</X>
+      <Y>14.463655187670941</Y>
+      <Z>0</Z>
+      <NodeType>SimpleWirelessSimualator.NodeDemo1</NodeType>
+    </WirelessNetworkNode>
+    <WirelessNetworkNode>
+      <X>13.5138712203023</X>
+      <Y>14.463655187670941</Y>
+      <Z>0</Z>
+      <NodeType>SimpleWirelessSimualator.NodeDemo1</NodeType>
+    </WirelessNetworkNode>
+    <WirelessNetworkNode>
+      <X>16.730949468784331</X>
+      <Y>14.566919427745674</Y>
+      <Z>0</Z>
+      <NodeType>SimpleWirelessSimualator.NodeDemo1</NodeType>
+    </WirelessNetworkNode>
+  </Nodes>
+  <Images>
+    <WirelessNetworkImage>
+      <Filename>C:\git\WirelessThingSim\SimpleWirelessSimualator\floorplan.png</Filename>
+      <X>0</X>
+      <Y>0</Y>
+      <Scale>0.02564102564102564</Scale>
+    </WirelessNetworkImage>
+  </Images>
+  <BaseTransmitRange>30</BaseTransmitRange>
+</WirelessNetwork>
