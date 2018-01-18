@@ -30,6 +30,7 @@ namespace SimpleWirelessSimualator
                 SimulatedNode simNode = (SimulatedNode)t.GetConstructor(new Type[] { }).Invoke(new object[] { });
                 simNode.ParentSimulation = this;
                 simNode.SourceNode = n;
+                simNode.MyID = SimulationNodes.Count;
 
                 WirelessSimulationNode sn = new WirelessSimulationNode()
                 {
@@ -74,7 +75,9 @@ namespace SimpleWirelessSimualator
 
             while(PendingEvents.HasEvent && PendingEvents.FirstEventTime < endTime)
             {
-                CurrentTime = PendingEvents.FirstEventTime;
+                if(PendingEvents.FirstEventTime > CurrentTime)
+                    CurrentTime = PendingEvents.FirstEventTime;
+
                 var e = PendingEvents.NextEvent();
 
                 ISimulatedDevice device = e.Origin as ISimulatedDevice;
@@ -139,7 +142,7 @@ namespace SimpleWirelessSimualator
             }
             var context = new TimerEventContext() { Callback = callback, Time = time };
             n.PastEvents.Append(new SimulationEvent(CurrentTime, n, EventType.TimerSet, context));
-            if(callback != null && time >= 0)
+            if(callback != null)
             {
                 n.TimerEvent = new SimulationEvent(CurrentTime + time, n, EventType.TimerComplete, context);
                 PendingEvents.Insert(n.TimerEvent);

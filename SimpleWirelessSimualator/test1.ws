@@ -2,22 +2,52 @@
 <WirelessNetwork xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Nodes>
     <WirelessNetworkNode>
-      <X>11.671001705122471</X>
-      <Y>14.463655187670941</Y>
+      <X>11.669020722824694</X>
+      <Y>14.484165545226642</Y>
       <Z>0</Z>
-      <NodeType>SimpleWirelessSimualator.NodeDemo1</NodeType>
+      <NodeType>SimpleWirelessSimualator.NodeProtocol</NodeType>
     </WirelessNetworkNode>
     <WirelessNetworkNode>
-      <X>13.5138712203023</X>
-      <Y>14.463655187670941</Y>
+      <X>13.396688415421535</X>
+      <Y>14.519424069565353</Y>
       <Z>0</Z>
-      <NodeType>SimpleWirelessSimualator.NodeDemo1</NodeType>
+      <NodeType>SimpleWirelessSimualator.NodeProtocol</NodeType>
     </WirelessNetworkNode>
     <WirelessNetworkNode>
-      <X>16.730949468784331</X>
-      <Y>14.566919427745674</Y>
+      <X>16.746248227599082</X>
+      <Y>14.519424069565353</Y>
       <Z>0</Z>
-      <NodeType>SimpleWirelessSimualator.NodeDemo1</NodeType>
+      <NodeType>SimpleWirelessSimualator.NodeProtocol</NodeType>
+    </WirelessNetworkNode>
+    <WirelessNetworkNode>
+      <X>18.191847725486234</X>
+      <Y>14.519424069565353</Y>
+      <Z>0</Z>
+      <NodeType>SimpleWirelessSimualator.NodeProtocol</NodeType>
+    </WirelessNetworkNode>
+    <WirelessNetworkNode>
+      <X>21.294597867292808</X>
+      <Y>14.589941118242773</Y>
+      <Z>0</Z>
+      <NodeType>SimpleWirelessSimualator.NodeProtocol</NodeType>
+    </WirelessNetworkNode>
+    <WirelessNetworkNode>
+      <X>6.8386028884212813</X>
+      <Y>14.554682593904063</Y>
+      <Z>0</Z>
+      <NodeType>SimpleWirelessSimualator.NodeProtocol</NodeType>
+    </WirelessNetworkNode>
+    <WirelessNetworkNode>
+      <X>8.4604950080019883</X>
+      <Y>14.484165545226642</Y>
+      <Z>0</Z>
+      <NodeType>SimpleWirelessSimualator.NodeProtocol</NodeType>
+    </WirelessNetworkNode>
+    <WirelessNetworkNode>
+      <X>22.563904743486404</X>
+      <Y>14.484165545226642</Y>
+      <Z>0</Z>
+      <NodeType>SimpleWirelessSimualator.NodeProtocol</NodeType>
     </WirelessNetworkNode>
   </Nodes>
   <Images>
@@ -28,5 +58,5 @@
       <Scale>0.02564102564102564</Scale>
     </WirelessNetworkImage>
   </Images>
-  <BaseTransmitRange>30</BaseTransmitRange>
+  <BaseTransmitRange>10</BaseTransmitRange>
 </WirelessNetwork>

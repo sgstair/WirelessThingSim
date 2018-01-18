@@ -56,6 +56,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="FileDialog.cs" />
+    <Compile Include="NodeProtocol.cs" />
     <Compile Include="NodeDemo1.cs" />
     <Compile Include="SimulatedNode.cs" />
     <Compile Include="WirelessNetwork.cs" />

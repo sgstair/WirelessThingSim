@@ -36,6 +36,8 @@ namespace SimpleWirelessSimualator
         public Action TimerAction;
         public SimulationEvent TimerEvent;
 
+        public int MyID;
+
         public Dictionary<int, bool> ButtonState = new Dictionary<int, bool>();
 
         public static Type[] FindSimulatedNodeTypes()
