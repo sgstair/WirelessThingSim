@@ -299,6 +299,20 @@ namespace SimpleWirelessSimualator
         public SimulatedNode Origin;
         public EventType Type;
         public object EventContext;
+
+        public override string ToString()
+        {
+            string extra = null;
+            switch(Type)
+            {
+                case EventType.LedChange: extra = ((Color)EventContext).ToString(); break;
+                case EventType.TimerSet: extra = ((TimerEventContext)EventContext).Time.ToString(); break;
+
+            }
+
+            if(extra != null) { extra = "," + extra; } else { extra = ""; }
+            return $"SimulationEvent({StartTime},{Type}{extra})";
+        }
     }
 
     public class TimerEventContext

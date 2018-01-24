@@ -58,6 +58,9 @@
     <Compile Include="FileDialog.cs" />
     <Compile Include="NodeProtocol.cs" />
     <Compile Include="NodeDemo1.cs" />
+    <Compile Include="RunUnitTests.xaml.cs">
+      <DependentUpon>RunUnitTests.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SimulatedNode.cs" />
     <Compile Include="WirelessNetwork.cs" />
     <Compile Include="WirelessNetworkSimulation.cs" />
@@ -77,6 +80,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="RunUnitTests.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WirlessNetworkControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -84,8 +84,12 @@ namespace SimpleWirelessSimualator
         void Activate()
         {
             SetLedColor(Colors.Green);
+            SetTimerCallback(0.1, FinishActivate);
+        }
+        void FinishActivate()
+        {
             WaitingForActivation = false;
-            SetTimerCallback(2, () => SetLedColor(Colors.Black));
+            SetTimerCallback(1.9, () => SetLedColor(Colors.Black));
         }
 
         bool WaitingForActivation = false;

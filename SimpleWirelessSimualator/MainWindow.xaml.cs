@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,7 @@ namespace SimpleWirelessSimualator
 
         public MainWindow()
         {
+            Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
             InitializeComponent();
             InitComboBox();
             InitUnitTestMenu();
@@ -41,15 +43,21 @@ namespace SimpleWirelessSimualator
             SimulationTimer = new Timer(SimulationTick);
 
             Closing += MainWindow_Closing;
+            Closed += MainWindow_Closed;
+        }
+
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            
         }
 
         void InitUnitTestMenu()
         {
             mnuUnitTest.Items.Clear();
-
-            foreach(var unitTests in WirelessUnitTesting.FindUnitTests())
+            MenuItem item;
+            foreach (var unitTests in WirelessUnitTesting.FindUnitTests())
             {
-                MenuItem item = new MenuItem() { Header = $"For {unitTests.NodeType.Name}" };
+                item = new MenuItem() { Header = $"For {unitTests.NodeType.Name}" };
                 
 
                 foreach(var test in unitTests.UnitTestMethods)
@@ -60,6 +68,18 @@ namespace SimpleWirelessSimualator
                 }
                 mnuUnitTest.Items.Add(item);
             }
+
+            mnuUnitTest.Items.Add(new Separator());
+            item = new MenuItem() { Header = "Run Unit Tests..." };
+            item.Click += RunTests_Click;
+            mnuUnitTest.Items.Add(item);
+        }
+
+        private void RunTests_Click(object sender, RoutedEventArgs e)
+        {
+            RunUnitTests w = new RunUnitTests();
+            w.LinkedWindow = this;
+            w.Show();
         }
 
         private void TestItem_Click(object sender, RoutedEventArgs e)
@@ -139,7 +159,7 @@ namespace SimpleWirelessSimualator
             return c;
         }
 
-        WirelessNetwork Network;
+        internal WirelessNetwork Network;
         WirelessNetworkSimulation Simulation;
 
         void SetupWirelessNetwork(WirelessNetwork wn)

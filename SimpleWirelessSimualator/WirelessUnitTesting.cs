@@ -19,20 +19,20 @@ namespace SimpleWirelessSimualator
         {
             List<WirelessUnitTests> outTests = new List<WirelessUnitTests>();
             Type[] nodeTypes = SimulatedNode.FindSimulatedNodeTypes();
-            foreach(var node in nodeTypes)
+            foreach (var node in nodeTypes)
             {
                 List<WirelessUnitTest> tests = new List<WirelessUnitTest>();
-                foreach(var method in node.GetMethods())
+                foreach (var method in node.GetMethods())
                 {
                     WirelessUnitTestAttribute attribute = method.GetCustomAttribute<WirelessUnitTestAttribute>();
                     if (attribute != null)
                     {
                         // Todo: Verify that test is static, and accepts a single parameter taking WirelessUnitTestInstance.
 
-                        tests.Add(new WirelessUnitTest() { UnitTestAttribute = attribute, UnitTestMethod = method });
+                        tests.Add(new WirelessUnitTest() { UnitTestAttribute = attribute, UnitTestMethod = method, NodeType = node });
                     }
                 }
-                if(tests.Count > 0)
+                if (tests.Count > 0)
                 {
                     outTests.Add(new WirelessUnitTests() { NodeType = node, UnitTestMethods = tests.ToArray() });
                 }

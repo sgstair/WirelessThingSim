@@ -136,6 +136,15 @@ namespace SimpleWirelessSimualator
         {
             SetTimerCallback(0, null);
         }
+
+        public SimulationEvent[] Last10Events
+        {
+            get
+            {
+                return PastEvents.Events.Reverse<SimulationEvent>().Take(10).ToArray();
+            }
+        }
+
     }
 
     interface ISimulatedDevice
