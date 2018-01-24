@@ -43,6 +43,8 @@ namespace SimpleWirelessSimualator
 
     class WirelessUnitTestInstance
     {
+        delegate void UnitTestDelegate(WirelessUnitTestInstance instance);
+
         public static WirelessUnitTestInstance RunUnitTest(WirelessNetwork net, WirelessUnitTest test)
         {
             WirelessUnitTestInstance instance = new WirelessUnitTestInstance(net);
@@ -50,7 +52,8 @@ namespace SimpleWirelessSimualator
             instance.TestPassed = false;
             try
             {
-                test.UnitTestMethod.Invoke(null, new object[] { instance });
+                UnitTestDelegate d = (UnitTestDelegate)Delegate.CreateDelegate(typeof(UnitTestDelegate), test.UnitTestMethod);
+                d(instance);
                 instance.TestPassed = true;
             }
             catch(Exception ex)
@@ -84,6 +87,11 @@ namespace SimpleWirelessSimualator
         public bool TestPassed = false;
         public Exception TestException = null;
         public int RandomSeed;
+
+        public int NextRandom(int max)
+        {
+            return r.Next(max);
+        }
 
         public SimulatedNode GetRandomNode()
         {
