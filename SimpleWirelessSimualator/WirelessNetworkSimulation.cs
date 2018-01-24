@@ -11,7 +11,9 @@ namespace SimpleWirelessSimualator
 {
     class WirelessNetworkSimulation
     {
-        Random r = new Random();
+        static Random SeedingRandom = new Random();
+        public int RandomSeed;
+        Random r;
         public WirelessNetwork Network;
 
         public List<WirelessSimulationNode> SimulationNodes = new List<WirelessSimulationNode>();
@@ -19,8 +21,11 @@ namespace SimpleWirelessSimualator
 
         public event Action LedStateChanged;
 
-        public WirelessNetworkSimulation(WirelessNetwork baseNetwork)
+        public WirelessNetworkSimulation(WirelessNetwork baseNetwork, int? seed = null)
         {
+            RandomSeed = seed == null ? SeedingRandom.Next() : seed.Value;
+            r = new Random(RandomSeed);
+
             Network = baseNetwork;
 
             foreach(var n in Network.Nodes)
@@ -119,11 +124,14 @@ namespace SimpleWirelessSimualator
 
         public void SetButtonState(WirelessSimulationNode n, bool state, int index = 0)
         {
-            n.Node.PastEvents.Append(new SimulationEvent(CurrentTime, n.Node, EventType.ButtonChange, new ButtonEventContext() { Index = index, Pressed = state }));
-            n.Node.ButtonState[index] = state;
-            ((ISimulatedDevice)n.Node).InputEvent(index, state);
+            SetButtonState(n.Node, state, index);
         }
-
+        public void SetButtonState(SimulatedNode n, bool state, int index=0)
+        {
+            n.PastEvents.Append(new SimulationEvent(CurrentTime, n, EventType.ButtonChange, new ButtonEventContext() { Index = index, Pressed = state }));
+            n.ButtonState[index] = state;
+            ((ISimulatedDevice)n).InputEvent(index, state);
+        }
 
 
         internal void NodeSetLed(SimulatedNode n, Color c)

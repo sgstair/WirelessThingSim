@@ -97,5 +97,20 @@ namespace SimpleWirelessSimualator
             public double TimeToActivation;
             public int SourceDeviceID;
         }
+
+
+
+        // Add unit tests to verify NodeProtocol
+        [WirelessUnitTest]
+        public static void VerifyBehavior(WirelessUnitTestInstance instance)
+        {
+            var node = instance.GetRandomNode();
+            instance.Simulation.SetButtonState(node, true);
+            instance.Simulation.SimulateTime(0.5);
+            instance.Simulation.SetButtonState(node, false);
+            instance.VerifyAllLedsChange(0.5, Colors.Green);
+            instance.VerifyAllLedsChange(2 - 0.005, Colors.Black);
+        }
+
     }
 }

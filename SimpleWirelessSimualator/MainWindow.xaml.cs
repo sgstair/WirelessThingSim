@@ -30,6 +30,7 @@ namespace SimpleWirelessSimualator
         {
             InitializeComponent();
             InitComboBox();
+            InitUnitTestMenu();
             SetupWirelessNetwork(new WirelessNetwork());
 
             NetworkControl.MouseMove += NetworkControl_MouseMove;
@@ -40,6 +41,35 @@ namespace SimpleWirelessSimualator
             SimulationTimer = new Timer(SimulationTick);
 
             Closing += MainWindow_Closing;
+        }
+
+        void InitUnitTestMenu()
+        {
+            mnuUnitTest.Items.Clear();
+
+            foreach(var unitTests in WirelessUnitTesting.FindUnitTests())
+            {
+                MenuItem item = new MenuItem() { Header = $"For {unitTests.NodeType.Name}" };
+                
+
+                foreach(var test in unitTests.UnitTestMethods)
+                {
+                    MenuItem testItem = new MenuItem() { Header = test.UnitTestMethod.Name, DataContext = test };
+                    testItem.Click += TestItem_Click;
+                    item.Items.Add(testItem);
+                }
+                mnuUnitTest.Items.Add(item);
+            }
+        }
+
+        private void TestItem_Click(object sender, RoutedEventArgs e)
+        {
+            WirelessUnitTest test = ((MenuItem)sender).DataContext as WirelessUnitTest;
+            if (test != null)
+            {
+                WirelessUnitTestInstance instance = WirelessUnitTestInstance.RunUnitTest(Network, test);
+                MessageBox.Show(instance.TestPassed ? "Passed!" : "Failed!");
+            }
         }
 
         private void NetworkControl_MouseWheel(object sender, MouseWheelEventArgs e)

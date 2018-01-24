@@ -33,6 +33,9 @@
                 <MenuItem x:Name="mnuSetBackground" Header="Set Background" Click="mnuSetBackground_Click"/>
                 <MenuItem x:Name="mnuRemoveBackground" Header="Remove Background" Click="mnuRemoveBackground_Click"/>
             </MenuItem>
+            <MenuItem Header="Unit Test" x:Name="mnuUnitTest">
+                
+            </MenuItem>
         </Menu>
 
 

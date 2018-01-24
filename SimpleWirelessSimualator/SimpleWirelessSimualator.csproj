@@ -61,6 +61,7 @@
     <Compile Include="SimulatedNode.cs" />
     <Compile Include="WirelessNetwork.cs" />
     <Compile Include="WirelessNetworkSimulation.cs" />
+    <Compile Include="WirelessUnitTesting.cs" />
     <Compile Include="WirlessNetworkControl.xaml.cs">
       <DependentUpon>WirlessNetworkControl.xaml</DependentUpon>
     </Compile>
