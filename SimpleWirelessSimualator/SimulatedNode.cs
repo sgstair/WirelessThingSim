@@ -38,6 +38,9 @@ namespace SimpleWirelessSimualator
 
         public int MyID;
 
+        public double ReceiverStateChangeTime = 0;
+        public object ReceiverCurrentContext = true;
+
         public Dictionary<int, bool> ButtonState = new Dictionary<int, bool>();
 
         public static Type[] FindSimulatedNodeTypes()
@@ -72,7 +75,10 @@ namespace SimpleWirelessSimualator
         /// </summary>
         public void RadioSetModePolling(double timeOn, double timeOff)
         {
-
+            ReceiverPollingContext c = new ReceiverPollingContext();
+            c.TimeOn = timeOn * DeviceTimingSkew;
+            c.TimeOff = timeOff * DeviceTimingSkew;
+            ParentSimulation.NodeSetReceiverState(this, c);
         }
 
         /// <summary>
@@ -80,7 +86,7 @@ namespace SimpleWirelessSimualator
         /// </summary>
         public void RadioSetModeReceive()
         {
-
+            ParentSimulation.NodeSetReceiverState(this, true);
         }
 
         /// <summary>
@@ -88,7 +94,7 @@ namespace SimpleWirelessSimualator
         /// </summary>
         public void RadioSetModeOff()
         {
-
+            ParentSimulation.NodeSetReceiverState(this, false);
         }
 
         /// <summary>

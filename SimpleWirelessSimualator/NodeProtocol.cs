@@ -20,7 +20,8 @@ namespace SimpleWirelessSimualator
         /// </summary>
         public void DeviceStart()
         {
-            RadioSetModeReceive();
+            //RadioSetModeReceive();
+            RadioSetModePolling(0.05, 0.5);
         }
 
         /// <summary>
@@ -42,6 +43,7 @@ namespace SimpleWirelessSimualator
                 WaitingForActivation = true;
                 double delay = ParentSimulation.NextRandom() * PacketSpacing;
                 SetTimerCallback(delay, () => SendActivationPacket());
+                SetLedColor(Colors.Red);
             }
         }
 
@@ -116,5 +118,50 @@ namespace SimpleWirelessSimualator
             instance.VerifyAllLedsChange(2 - 0.005, Colors.Black);
         }
 
+
+        class NodeTime
+        {
+            public bool Success;
+            public double Time;
+            public SimulatedNode Node;
+        }
+
+        [WirelessReport]
+        public static string NodeResponseReport(WirelessUnitTestInstance instance)
+        {
+            List<string> strings = new List<string>();
+            double startTime = 0;
+            while (true)
+            {
+                var evt = instance.FindNextButtonPress(startTime);
+                if (evt == null) break;
+
+                if (strings.Count != 0) strings.Add("");
+                startTime = evt.StartTime;
+                strings.Add($"Button press on Node {evt.Origin.MyID} at {startTime}:");
+
+                List<NodeTime> LedChange = new List<NodeTime>();
+                List<NodeTime> FirstPacket = new List<NodeTime>();
+
+                foreach(var node in instance.Simulation.SimulationNodes)
+                {
+                    evt = instance.FindFirstLedColor(node.Node, startTime, startTime + 1.5, (c) => c == Colors.Green);
+                    if (evt == null) LedChange.Add(new NodeTime() { Success = false, Node = node.Node });
+                    else LedChange.Add(new NodeTime() { Success = true, Time = evt.StartTime - startTime, Node = node.Node });
+
+                    evt = instance.FindFirstReceivedPacket(node.Node, startTime, startTime + 1.5);
+                    if (evt == null) FirstPacket.Add(new NodeTime() { Success = false, Node = node.Node });
+                    else FirstPacket.Add(new NodeTime() { Success = true, Time = evt.StartTime - startTime, Node = node.Node });
+                }
+
+                LedChange.Sort((n1, n2)=>n1.Time.CompareTo(n2.Time));
+                FirstPacket.Sort((n1, n2) => n1.Time.CompareTo(n2.Time));
+
+                foreach (var nt in FirstPacket) strings.Add($"  Node {nt.Node.MyID}: Received at {nt.Time} ({nt.Success})");
+                foreach (var nt in LedChange) strings.Add($"  Node {nt.Node.MyID}: Led Change at {nt.Time} ({nt.Success})");
+
+            }
+            return string.Join("\n", strings);
+        }
     }
 }

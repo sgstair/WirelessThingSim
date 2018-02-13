@@ -134,6 +134,13 @@ namespace SimpleWirelessSimualator
         }
 
 
+        internal void NodeSetReceiverState(SimulatedNode n, object stateContext)
+        {
+            n.PastEvents.Append(new SimulationEvent(CurrentTime, n, EventType.PowerState, stateContext));
+            n.ReceiverStateChangeTime = CurrentTime;
+            n.ReceiverCurrentContext = stateContext;
+        }
+
         internal void NodeSetLed(SimulatedNode n, Color c)
         {
             n.LedColor = c;
@@ -155,6 +162,27 @@ namespace SimpleWirelessSimualator
                 n.TimerEvent = new SimulationEvent(CurrentTime + time, n, EventType.TimerComplete, context);
                 PendingEvents.Insert(n.TimerEvent);
             }
+        }
+
+        bool NodeIsReceiving(SimulatedNode n)
+        {
+            if(n.ReceiverCurrentContext is bool)
+            {
+                return (bool)n.ReceiverCurrentContext;
+            }
+            var context = n.ReceiverCurrentContext as ReceiverPollingContext;
+            if(context != null)
+            {
+                double timeSinceEvent = CurrentTime - n.ReceiverStateChangeTime;
+                double pollCycleLength = context.TimeOn + context.TimeOff;
+
+                // Find offset in receive cycle.
+                double cycleOffset = timeSinceEvent - Math.Floor(timeSinceEvent / pollCycleLength) * pollCycleLength;
+
+                // Does the offset in the polling cycle fall in the on time?
+                return cycleOffset < context.TimeOn;
+            }
+            throw new Exception("Invalid state for receiver context");
         }
 
         internal void NodeSendPacket(SimulatedNode n, object packet, double preDelay)
@@ -221,6 +249,14 @@ namespace SimpleWirelessSimualator
                         t.ReceiveSuccess = false;
                         otherPacket.ReceiveSuccess = false;
                     }   
+                }
+
+                // Check whether the target node is receiving at time of packet start
+                // Note: this actually uses the current time (ignores air propogation time, which is negligible)
+                if(!NodeIsReceiving(sn.Node))
+                {
+                    // Node is not receiving, would miss the packet.
+                    t.ReceiveSuccess = false;
                 }
 
                 // Queue this pending packet (end transmission, and in node pending list)
@@ -325,6 +361,11 @@ namespace SimpleWirelessSimualator
     {
         public int Index;
         public bool Pressed;
+    }
+
+    public class ReceiverPollingContext
+    {
+        public double TimeOn, TimeOff;
     }
 
     class WirelessPacket

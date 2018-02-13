@@ -73,6 +73,26 @@ namespace SimpleWirelessSimualator
             item = new MenuItem() { Header = "Run Unit Tests..." };
             item.Click += RunTests_Click;
             mnuUnitTest.Items.Add(item);
+
+            mnuUnitTest.Items.Add(new Separator());
+
+            foreach(var report in WirelessReporting.FindReports())
+            {
+                item = new MenuItem() { Header = $"{report.NodeType.Name}:{report.ReportMethod.Name}", DataContext = report };
+                item.Click += ReportItem_Click;
+                mnuUnitTest.Items.Add(item);
+            }
+        }
+
+        private void ReportItem_Click(object sender, RoutedEventArgs e)
+        {
+            WirelessReport rpt = ((MenuItem)sender).DataContext as WirelessReport;
+            if (rpt != null && Simulation != null)
+            {
+                WirelessUnitTestInstance instance = WirelessUnitTestInstance.InstanceFromSimulation(Simulation);
+                string output = instance.RunReport(rpt);
+                System.Diagnostics.Debug.WriteLine(output);
+            }
         }
 
         private void RunTests_Click(object sender, RoutedEventArgs e)
