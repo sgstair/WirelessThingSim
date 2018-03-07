@@ -293,6 +293,10 @@ namespace SimpleWirelessSimualator
         public void Append(SimulationEvent e)
         {
             Events.Add(e);
+            if(Events.Count > 80000)
+            {
+                return;
+            }
         }
 
         public bool HasEvent { get { return Events.Count > 0; } }
@@ -305,6 +309,11 @@ namespace SimpleWirelessSimualator
             SimulationEvent e = Events[0];
             Events.RemoveAt(0);
             return e;
+        }
+
+        public override string ToString()
+        {
+            return $"SimulationEventQueue({Events.Count} events)";
         }
     }
 
@@ -343,7 +352,7 @@ namespace SimpleWirelessSimualator
             {
                 case EventType.LedChange: extra = ((Color)EventContext).ToString(); break;
                 case EventType.TimerSet: extra = ((TimerEventContext)EventContext).Time.ToString(); break;
-
+                case EventType.PacketComplete: extra = ((WirelessPacketTransmission)EventContext).ReceiveSuccess ? " Succeeded" : " Failed"; break;
             }
 
             if(extra != null) { extra = "," + extra; } else { extra = ""; }

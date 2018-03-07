@@ -44,11 +44,39 @@ namespace SimpleWirelessSimualator
 
             Closing += MainWindow_Closing;
             Closed += MainWindow_Closed;
+
+            TryAutoload();
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
         {
             
+        }
+
+        void TryAutoload()
+        {
+            // Try to load the autoload file. If it fails, just silently give up
+            string autoload = Properties.Settings.Default.AutoloadFile;
+            if(!string.IsNullOrEmpty(autoload))
+            {
+                try
+                {
+                    WirelessNetwork wn = LoadNetwork(autoload);
+
+                    StopSimulation();
+                    SetupWirelessNetwork(wn);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+        void SetAutoload(string filename)
+        {
+            Properties.Settings.Default.AutoloadFile = filename;
+            Properties.Settings.Default.Save();
         }
 
         void InitUnitTestMenu()
@@ -433,22 +461,28 @@ namespace SimpleWirelessSimualator
                 // Try to load it
                 try
                 {
-                    FileStream fs = File.OpenRead(filename);
-
-                    XmlSerializer xs = new XmlSerializer(typeof(WirelessNetwork));
-                    WirelessNetwork wn = (WirelessNetwork)xs.Deserialize(fs);
-
-                    fs.Close();
-
+                    WirelessNetwork wn = LoadNetwork(filename);
 
                     StopSimulation();
                     SetupWirelessNetwork(wn);
+                    SetAutoload(filename);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Exception while trying to Load file.\n" + ex.ToString());
                 }
             }
+        }
+
+        private static WirelessNetwork LoadNetwork(string filename)
+        {
+            FileStream fs = File.OpenRead(filename);
+
+            XmlSerializer xs = new XmlSerializer(typeof(WirelessNetwork));
+            WirelessNetwork wn = (WirelessNetwork)xs.Deserialize(fs);
+
+            fs.Close();
+            return wn;
         }
 
         private void mnuSave_Click(object sender, RoutedEventArgs e)
@@ -465,6 +499,7 @@ namespace SimpleWirelessSimualator
                     xs.Serialize(fs, Network);
 
                     fs.Close();
+                    SetAutoload(filename);
                 }
                 catch(Exception ex)
                 {

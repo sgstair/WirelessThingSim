@@ -13,7 +13,14 @@ namespace SimpleWirelessSimualator
     [SimulatedNode]
     class NodeProtocol : SimulatedNode, ISimulatedDevice
     {
-        const double PacketSpacing = 0.01;
+        const double PacketSpacing = 0.003;
+        const double MasterSpacing = 0.001;
+
+        const int PacketThreshold = 5;
+
+        int PacketCount = 0;
+        bool MasterMode = false;
+        double MyPacketSpacing = 0;
 
         /// <summary>
         /// Called to start or reset a device
@@ -21,7 +28,7 @@ namespace SimpleWirelessSimualator
         public void DeviceStart()
         {
             //RadioSetModeReceive();
-            RadioSetModePolling(0.05, 0.5);
+            RadioSetModePolling(0.003, 0.1);
         }
 
         /// <summary>
@@ -34,6 +41,7 @@ namespace SimpleWirelessSimualator
             {
                 // Do nothing- already aware of the impending activation
                 // Future: Deal with the possibility of two nodes being activated independently
+                PacketCount++;
             }
             else
             {
@@ -44,6 +52,9 @@ namespace SimpleWirelessSimualator
                 double delay = ParentSimulation.NextRandom() * PacketSpacing;
                 SetTimerCallback(delay, () => SendActivationPacket());
                 SetLedColor(Colors.Red);
+                PacketCount = 0;
+                MasterMode = false;
+                MyPacketSpacing = PacketSpacing;
             }
         }
 
@@ -58,6 +69,9 @@ namespace SimpleWirelessSimualator
                 ActivatingId = MyID;
                 WaitingForActivation = true;
                 SendActivationPacket();
+                PacketCount = 0;
+                MasterMode = true;
+                MyPacketSpacing = MasterSpacing;
             }
         }
 
@@ -66,20 +80,21 @@ namespace SimpleWirelessSimualator
             ProtocolPacket pkt = new ProtocolPacket();
             pkt.SourceDeviceID = ActivatingId;
             pkt.TimeToActivation = ActivateAt - CurrentTime - preDelay;
-            if (pkt.TimeToActivation > 0)
+            if (pkt.TimeToActivation > 0 && (PacketCount < PacketThreshold || MasterMode))
             {
                 RadioTransmitPacket(pkt, preDelay);
             }
+            PacketCount = 0;
 
             // Decide whether to send more packets.
             double timetoEnd = ActivateAt - CurrentTime;
-            if(timetoEnd < PacketSpacing)
+            if(timetoEnd < MyPacketSpacing)
             {
                 SetTimerCallback(timetoEnd, () => Activate());
             }
             else
             {
-                SetTimerCallback(PacketSpacing, () => SendActivationPacket());
+                SetTimerCallback(MyPacketSpacing, () => SendActivationPacket());
             }
         }
 
