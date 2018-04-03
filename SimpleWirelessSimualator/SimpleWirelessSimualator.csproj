@@ -55,6 +55,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DebugDevice.xaml.cs">
+      <DependentUpon>DebugDevice.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DebugViewer.xaml.cs">
+      <DependentUpon>DebugViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FileDialog.cs" />
     <Compile Include="NodeProtocol.cs" />
     <Compile Include="NodeDemo1.cs" />
@@ -68,6 +74,14 @@
     <Compile Include="WirlessNetworkControl.xaml.cs">
       <DependentUpon>WirlessNetworkControl.xaml</DependentUpon>
     </Compile>
+    <Page Include="DebugDevice.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DebugViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

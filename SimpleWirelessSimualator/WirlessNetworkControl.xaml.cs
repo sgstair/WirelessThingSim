@@ -159,7 +159,17 @@ namespace SimpleWirelessSimualator
 
                     }
                 }
-
+                int i = 0;
+                foreach (var node in Network.Nodes)
+                {
+                    Point pt = new Point(node.X, node.Y);
+                    pt = LocalToScreen(pt);
+                    FormattedText f = new FormattedText(i.ToString(), CultureInfo.InvariantCulture, FlowDirection.LeftToRight, face, 16, Brushes.Black);
+                    i++;
+                    pt.X -= f.Width / 2;
+                    pt.Y += 12;
+                    dc.DrawText(f, pt);
+                }
             }
             if(UserCursor != null)
             {

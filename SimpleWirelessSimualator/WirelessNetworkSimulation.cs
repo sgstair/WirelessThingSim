@@ -54,12 +54,15 @@ namespace SimpleWirelessSimualator
             return r.NextDouble();
         }
 
+        public double SavedPreSimulationTime = 0;
+
         /// <summary>
         /// Start a simulation (turn on the nodes at random times before this point)
         /// </summary>
         /// <param name="preSimulationTime">How long before the simulation starts might the devices be turned on</param>
         public void StartSimulation(double preSimulationTime = 120)
         {
+            SavedPreSimulationTime = preSimulationTime;
             PendingEvents = new SimulationEventQueue();
 
             // Insert node poweron events
@@ -187,7 +190,7 @@ namespace SimpleWirelessSimualator
 
         internal void NodeSendPacket(SimulatedNode n, object packet, double preDelay)
         {
-            WirelessPacket wp = new WirelessPacket() { StartTime = CurrentTime + preDelay, Origin = n, PacketContents = packet };
+            WirelessPacket wp = new WirelessPacket() { StartTime = CurrentTime + preDelay,  Origin = n, PacketContents = packet };
 
             // Compute how long the packet is being transmitted for
             double transmitSpeed = 2000000;
@@ -197,7 +200,7 @@ namespace SimpleWirelessSimualator
 
             wp.EndTime = wp.StartTime + packetTime;
 
-            n.PastEvents.Append(new SimulationEvent(CurrentTime, n, EventType.Packet, wp));
+            n.PastEvents.Append(new SimulationEvent(CurrentTime, n, EventType.Packet, wp, end: wp.EndTime));
 
             // Find nodes that are in range
             foreach (var sn in SimulationNodes)
@@ -247,7 +250,9 @@ namespace SimpleWirelessSimualator
                     if(t.Overlaps(otherPacket))
                     {
                         t.ReceiveSuccess = false;
+                        t.Collision = true;
                         otherPacket.ReceiveSuccess = false;
+                        otherPacket.Collision = true;
                     }   
                 }
 
@@ -332,9 +337,10 @@ namespace SimpleWirelessSimualator
 
     class SimulationEvent
     {
-        public SimulationEvent(double start, SimulatedNode node, EventType t, object context = null)
+        public SimulationEvent(double start, SimulatedNode node, EventType t, object context = null, double end = double.MaxValue)
         {
             StartTime = start;
+            EndTime = end;
             Origin = node;
             Type = t;
             EventContext = context;
@@ -391,6 +397,7 @@ namespace SimpleWirelessSimualator
         public double SignalLevel; // Representative signal level for the packet (approximately in dBmv)
         public double WirelessDelay; // Time it takes packet to move through the air
         public bool ReceiveSuccess = true; // Set to false whenever packet fails for some reason.
+        public bool Collision = false; // Packet failed to be received due to collision.
 
         public double StartTime { get { return Packet.StartTime + WirelessDelay; } }
         public double EndTime { get { return Packet.EndTime + WirelessDelay; } }

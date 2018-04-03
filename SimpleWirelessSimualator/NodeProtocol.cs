@@ -15,6 +15,7 @@ namespace SimpleWirelessSimualator
     {
         const double PacketSpacing = 0.003;
         const double MasterSpacing = 0.001;
+        const double PacketRandomness = 0.001;
 
         const int PacketThreshold = 5;
 
@@ -88,13 +89,15 @@ namespace SimpleWirelessSimualator
 
             // Decide whether to send more packets.
             double timetoEnd = ActivateAt - CurrentTime;
-            if(timetoEnd < MyPacketSpacing)
+            double thisPacketSpacing = MyPacketSpacing + ParentSimulation.NextRandom() * PacketRandomness;
+
+            if(timetoEnd < thisPacketSpacing)
             {
                 SetTimerCallback(timetoEnd, () => Activate());
             }
             else
             {
-                SetTimerCallback(MyPacketSpacing, () => SendActivationPacket());
+                SetTimerCallback(thisPacketSpacing, () => SendActivationPacket());
             }
         }
 
@@ -131,6 +134,8 @@ namespace SimpleWirelessSimualator
             instance.Simulation.SetButtonState(node, false);
             instance.VerifyAllLedsChange(0.5, Colors.Green);
             instance.VerifyAllLedsChange(2 - 0.005, Colors.Black);
+
+            throw new Exception("Temporary failure"); // For testing while building the debug viewer UI.
         }
 
 

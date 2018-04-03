@@ -24,7 +24,7 @@ namespace SimpleWirelessSimualator
         public RunUnitTests()
         {
             InitializeComponent();
-            textIterations.Text = "1000";
+            textIterations.Text = "1";
             InitComboBox();
             
         }
@@ -97,7 +97,9 @@ namespace SimpleWirelessSimualator
 
                         Dispatcher.Invoke(() =>
                         {
-                            ListBoxItem lb = new ListBoxItem() { Content = $"({index}) Test Failed: {instance.TestException.ToString()}", DataContext = instance, Background = Brushes.LightPink };
+                            ListBoxItem lb = new ListBoxItem() {
+                                    Content = $"({index}) Test Failed: {instance.TestException.ToString()}", DataContext = instance, Background = Brushes.LightPink
+                            };
                             lb.MouseDoubleClick += OpenTestFailureItem;
                             listBox.Items.Add(lb);
                         });
@@ -125,7 +127,12 @@ namespace SimpleWirelessSimualator
 
         private void OpenTestFailureItem(object sender, MouseButtonEventArgs e)
         {
-            
+            var item = ((ListBoxItem)sender).DataContext as WirelessUnitTestInstance;
+
+            DebugViewer viewer = new DebugViewer();
+            viewer.BindSimulation(item.Simulation);
+            viewer.Show();
+
         }
     }
 }
