@@ -9,7 +9,10 @@
     <Grid>
         <ScrollBar x:Name="scrollTime" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
         <ScrollViewer Margin="0,0,0,16.5">
-            <StackPanel x:Name="deviceStack" Margin="0"/>
+            <Grid Margin="0">
+                <StackPanel x:Name="deviceStack" Margin="0"/>
+                <local:DebugPopup x:Name="popup" Margin="0"/>
+            </Grid>
         </ScrollViewer>
 
     </Grid>

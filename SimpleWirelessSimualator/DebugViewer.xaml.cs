@@ -45,6 +45,7 @@ namespace SimpleWirelessSimualator
                 {
                     ((DebugDevice)item).InvalidateVisual();
                 }
+                popup.InvalidateVisual();
 
                 e.Handled = true;
             }
@@ -73,6 +74,7 @@ namespace SimpleWirelessSimualator
                 {
                     DebugDevice dev = new DebugDevice();
                     dev.BindNode(Timeline, device.Node);
+                    dev.FocusEventChange += Dev_FocusEventChange; 
                     RepresentativeDevice = dev;
                     deviceStack.Children.Add(dev);
                 }
@@ -80,8 +82,11 @@ namespace SimpleWirelessSimualator
 
         }
 
-
-
+        private void Dev_FocusEventChange(DebugDevice dev)
+        {
+            popup.SetElement(dev, dev.FocusEvent);
+                
+        }
     }
 
     public class DebugTimeWindow

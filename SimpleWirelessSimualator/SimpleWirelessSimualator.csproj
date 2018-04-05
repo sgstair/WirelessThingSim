@@ -58,6 +58,9 @@
     <Compile Include="DebugDevice.xaml.cs">
       <DependentUpon>DebugDevice.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DebugPopup.xaml.cs">
+      <DependentUpon>DebugPopup.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DebugViewer.xaml.cs">
       <DependentUpon>DebugViewer.xaml</DependentUpon>
     </Compile>
@@ -75,6 +78,10 @@
       <DependentUpon>WirlessNetworkControl.xaml</DependentUpon>
     </Compile>
     <Page Include="DebugDevice.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DebugPopup.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

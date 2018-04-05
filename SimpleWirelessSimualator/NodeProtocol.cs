@@ -13,9 +13,10 @@ namespace SimpleWirelessSimualator
     [SimulatedNode]
     class NodeProtocol : SimulatedNode, ISimulatedDevice
     {
-        const double PacketSpacing = 0.003;
+        const double PacketSpacing = 0.0015;
         const double MasterSpacing = 0.001;
         const double PacketRandomness = 0.001;
+        const double PacketSpacingIncrease = 0.0001;
 
         const int PacketThreshold = 5;
 
@@ -29,6 +30,10 @@ namespace SimpleWirelessSimualator
         public void DeviceStart()
         {
             //RadioSetModeReceive();
+            SetPollingMode();
+        }
+        void SetPollingMode()
+        {
             RadioSetModePolling(0.003, 0.1);
         }
 
@@ -56,6 +61,7 @@ namespace SimpleWirelessSimualator
                 PacketCount = 0;
                 MasterMode = false;
                 MyPacketSpacing = PacketSpacing;
+                RadioSetModeReceive();
             }
         }
 
@@ -73,6 +79,7 @@ namespace SimpleWirelessSimualator
                 PacketCount = 0;
                 MasterMode = true;
                 MyPacketSpacing = MasterSpacing;
+                RadioSetModeReceive();
             }
         }
 
@@ -86,6 +93,7 @@ namespace SimpleWirelessSimualator
                 RadioTransmitPacket(pkt, preDelay);
             }
             PacketCount = 0;
+            MyPacketSpacing += PacketSpacingIncrease;
 
             // Decide whether to send more packets.
             double timetoEnd = ActivateAt - CurrentTime;
@@ -103,6 +111,7 @@ namespace SimpleWirelessSimualator
 
         void Activate()
         {
+            SetPollingMode();
             SetLedColor(Colors.Green);
             SetTimerCallback(0.1, FinishActivate);
         }
@@ -135,7 +144,7 @@ namespace SimpleWirelessSimualator
             instance.VerifyAllLedsChange(0.5, Colors.Green);
             instance.VerifyAllLedsChange(2 - 0.005, Colors.Black);
 
-            throw new Exception("Temporary failure"); // For testing while building the debug viewer UI.
+            //throw new Exception("Temporary failure"); // For testing while building the debug viewer UI.
         }
 
 

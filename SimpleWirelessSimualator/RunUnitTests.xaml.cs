@@ -133,6 +133,7 @@ namespace SimpleWirelessSimualator
             viewer.BindSimulation(item.Simulation);
             viewer.Show();
 
+            e.Handled = true;
         }
     }
 }
